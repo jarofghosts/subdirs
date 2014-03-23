@@ -1,6 +1,8 @@
 subdirs
 ====
 
+[![Build Status](https://travis-ci.org/jarofghosts/subdirs.svg?branch=master)](https://travis-ci.org/jarofghosts/subdirs)
+
 get a list of all subdirectories
 
 ## usage
