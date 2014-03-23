@@ -1,0 +1,26 @@
+{
+  "name": "subdirs",
+  "version": "0.0.0",
+  "description": "list of all subdirectories",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "tape test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jarofghosts/subdirs.git"
+  },
+  "keywords": [
+    "subdir",
+    "list"
+  ],
+  "author": "jesse keane",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jarofghosts/subdirs/issues"
+  },
+  "homepage": "https://github.com/jarofghosts/subdirs"
+}
