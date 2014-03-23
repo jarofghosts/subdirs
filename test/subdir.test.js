@@ -26,7 +26,7 @@ test('returns empty array if no subdirs', function(t) {
 
   subdirs(f('a'), function(err, dirs) {
     t.ok(!err, 'not an error')
-    t.deepEqual([], dirs)
+    t.deepEqual([], dirs, 'empty array')
   })
 })
 
