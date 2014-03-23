@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/jarofghosts/subdirs/issues"
   },
-  "homepage": "https://github.com/jarofghosts/subdirs"
+  "homepage": "https://github.com/jarofghosts/subdirs",
+  "devDependencies": {
+    "tape": "^2.11.0"
+  }
 }
