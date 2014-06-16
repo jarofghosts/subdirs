@@ -3,9 +3,15 @@ var path = require('path')
 
 module.exports = subdirs
 
-function subdirs(root, cb) {
+function subdirs(root, opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts;
+    opts = {};
+  }
+
   var root = path.normalize(root)
     , subs = []
+    , recursive = ('recursive' in opts) ? opts.recursive : true
 
   var total = 0
     , counter = 0
@@ -34,11 +40,12 @@ function subdirs(root, cb) {
           
             if (not_subdir) return counter > total ? finish() : null
 
-            ++total
-
             subs.push(filename)
 
-            get_list(filename, get_list)
+            if (recursive) {
+              ++total
+              get_list(filename, get_list)
+            }
           }
         }(path.join(full_path, files[i])))
       }
