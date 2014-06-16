@@ -5,8 +5,8 @@ module.exports = subdirs
 
 function subdirs(root, opts, cb) {
   if (typeof opts === 'function') {
-    cb = opts;
-    opts = {};
+    cb = opts
+    opts = {}
   }
 
   var root = path.normalize(root)
