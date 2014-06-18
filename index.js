@@ -3,51 +3,49 @@ var path = require('path')
 
 module.exports = subdirs
 
-function subdirs(root, cb) {
-  var root = path.normalize(root)
-    , subs = []
+function subdirs(root, maxDepth, cb) {
+  if (typeof maxDepth === 'function') {
+    cb = maxDepth
+    maxDepth = Infinity
+  }
 
-  var total = 0
-    , counter = 0
+  var subs = []
+    , pending = 0
+    , failed = false
 
-  get_list(root)
-
-  function get_list(full_path) {
-    fs.readdir(full_path, parse_list)
-
-    function parse_list(err, files) {
-      if (err) return cb(err)
-
-      total += files.length
-
-      for (var i = 0, l = files.length; i < l; ++i) {
-        (function check_path(filename) {
-          fs.lstat(filename, check_file)
-
-          function check_file(err, stats) {
-            ++counter
-
-            if (err) return cb(err)
-
-            var not_subdir = stats.isSymbolicLink() || !stats.isDirectory()
-            not_subdir = not_subdir || subs.indexOf(filename) > -1
-          
-            if (not_subdir) return counter > total ? finish() : null
-
-            ++total
-
-            subs.push(filename)
-
-            get_list(filename, get_list)
-          }
-        }(path.join(full_path, files[i])))
-      }
-
-      if (++counter > total) finish()
+  function fail(err) {
+    if (!failed) {
+      failed = true
+      cb(err)
     }
   }
 
-  function finish() {
-    cb(null, subs)
+  function complete() {
+    if (--pending === 0) cb(null, subs)
   }
+
+  function enqueue(file, depth) {
+    if (depth > maxDepth) return
+    pending++
+    
+    fs.stat(file, _processFile)
+
+    function _processFile(err, stat) {
+      if (err) return fail(err)
+      if (!stat.isDirectory() || stat.isSymbolicLink()) return complete();
+      if (depth >= 0) subs.push(file)
+      fs.readdir(file, _processDirectoryListing)
+
+      function _processDirectoryListing(err, files) {
+        if (err) return fail(err)
+        for (var i = 0, len = files.length; i < len; ++i) {
+          enqueue(path.join(file, files[i]), depth + 1)
+        }
+        complete()
+      }
+    }
+
+  }
+
+  enqueue(path.normalize(root), -1)
 }
