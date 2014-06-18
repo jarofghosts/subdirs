@@ -28,21 +28,22 @@ function subdirs(root, maxDepth, cb) {
     if (depth > maxDepth) return
     pending++
     
-    fs.stat(file, function _processFile(err, stat) {
+    fs.stat(file, _processFile)
+
+    function _processFile(err, stat) {
       if (err) return fail(err)
-      if (stat.isDirectory() && !stat.isSymbolicLink()) {
-        if (depth >= 0) subs.push(file)
-        fs.readdir(file, function _processDirectoryListing(err, files) {
-          if (err) return fail(err)
-          files.forEach(function(f) {
-            enqueue(path.join(file, f), depth + 1)
-          })
-          complete()
-        })
-      } else {
+      if (!stat.isDirectory() || stat.isSymbolicLink()) return complete();
+      if (depth >= 0) subs.push(file)
+      fs.readdir(file, _processDirectoryListing)
+
+      function _processDirectoryListing(err, files) {
+        if (err) return fail(err)
+        for (var i = 0, len = files.length; i < len; ++i) {
+          enqueue(path.join(file, files[i]), depth + 1)
+        }
         complete()
       }
-    })
+    }
 
   }
 
