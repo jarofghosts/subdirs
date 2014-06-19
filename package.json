@@ -1,6 +1,6 @@
 {
   "name": "subdirs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "list of all subdirectories",
   "main": "index.js",
   "directories": {
