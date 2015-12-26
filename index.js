@@ -1,53 +1,78 @@
 var path = require('path')
-  , fs = require('fs')
+var fs = require('fs')
+
+var Promise = require('es6-promise').Promise
 
 module.exports = subdirs
 
-function subdirs(root, maxDepth, cb) {
-  if(typeof maxDepth === 'function') {
+function subdirs (root, maxDepth, cb) {
+  if (typeof maxDepth === 'function') {
     cb = maxDepth
     maxDepth = Infinity
   }
 
   var failed = false
-    , pending = 0
-    , subs = []
+  var pending = 0
+  var subs = []
 
-  function fail(err) {
-    if(!failed) {
-      failed = true
-      cb(err)
+  if (!cb) {
+    return new Promise(begin)
+  }
+
+  begin(cb.bind(this, null), cb)
+
+  function begin (resolve, reject) {
+    enqueue(path.normalize(root), -1)
+
+    function fail (err) {
+      if (!failed) {
+        failed = true
+        reject(err)
+      }
     }
-  }
 
-  function complete() {
-    if(--pending === 0) cb(null, subs)
-  }
+    function complete () {
+      if (--pending === 0) {
+        resolve(subs)
+      }
+    }
 
-  function enqueue(file, depth) {
-    if(depth > maxDepth) return
-    pending++
-    
-    fs.stat(file, processFile)
+    function enqueue (file, depth) {
+      if (depth > maxDepth) {
+        return
+      }
 
-    function processFile(err, stat) {
-      if(err) return fail(err)
-      if(!stat.isDirectory() || stat.isSymbolicLink()) return complete()
-      if(depth >= 0) subs.push(file)
+      pending++
 
-      fs.readdir(file, processDirectoryListing)
+      fs.stat(file, processFile)
 
-      function processDirectoryListing(err, files) {
-        if(err) return fail(err)
-
-        for(var i = 0, len = files.length; i < len; ++i) {
-          enqueue(path.join(file, files[i]), depth + 1)
+      function processFile (err, stat) {
+        if (err) {
+          return fail(err)
         }
 
-        complete()
+        if (!stat.isDirectory() || stat.isSymbolicLink()) {
+          return complete()
+        }
+
+        if (depth >= 0) {
+          subs.push(file)
+        }
+
+        fs.readdir(file, processDirectoryListing)
+
+        function processDirectoryListing (err, files) {
+          if (err) {
+            return fail(err)
+          }
+
+          for (var i = 0, len = files.length; i < len; ++i) {
+            enqueue(path.join(file, files[i]), depth + 1)
+          }
+
+          complete()
+        }
       }
     }
   }
-
-  enqueue(path.normalize(root), -1)
 }
