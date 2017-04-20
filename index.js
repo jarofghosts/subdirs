@@ -44,7 +44,7 @@ function subdirs (root, maxDepth, cb) {
 
       pending++
 
-      fs.stat(file, processFile)
+      fs.lstat(file, processFile)
 
       function processFile (err, stat) {
         if (err) {
